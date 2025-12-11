@@ -1,0 +1,34 @@
+{
+  "driver": {
+    "browser": "chrome",
+    "remote_url": "",
+    "wait_time": 10,
+    "page_load_wait_time": 0,
+    "options": [],
+    "capabilities": {},
+    "experimental_options": null,
+    "extension_paths": [],
+    "webdriver_kwargs": {},
+    "local_path": ""
+  },
+  "logging": {
+    "screenshots_on": true
+  },
+  "screenshots": {
+    "path": "reports/screenshots"
+  },
+  "viewport": {
+    "maximize": true,
+    "width": 1440,
+    "height": 900,
+    "orientation": "portrait"
+  },
+  "environments": {
+    "dev": {"url": "https://dev.example.com"},
+    "qa": {"url": "https://the-internet.herokuapp.com/login"},
+    "stage": {"url": "https://stage.example.com"},
+    "prod": {"url": "https://example.com"}
+  },
+
+  "customer": {}
+}

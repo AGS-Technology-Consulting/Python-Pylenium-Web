@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.DS_Store
+*.egg-info/
+.eggs/
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Pylenium specific
+screenshots/
+logs/
+reports/screenshots/
+
+# Allure Reports
+reports/allure-results/
+reports/allure-report/
+allure-report/
+allure-results/
+reports/
+test_results/
+
+# Pytest
+.cache/
+pytest_cache/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Environments
+.env
+.env.*
