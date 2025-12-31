@@ -15,6 +15,7 @@ from pylenium.driver import Pylenium
 
 from utils.logger import get_logger
 from utils.screenshot import save_screenshot_on_failure
+from utils.api_helper import api_helper
 
 LOGGER = get_logger("conftest")
 
@@ -60,6 +61,41 @@ def base_url(env):
         return cfg["environments"][env]["url"]
 
     return cfg.get("url", "http://localhost")
+
+
+# -------------------------------------------------------------------------
+# API HELPER HOOKS - Jenkins Integration
+# -------------------------------------------------------------------------
+
+def pytest_sessionstart(session):
+    """
+    Called before test session starts
+    API-1: Create Pipeline Run
+    """
+    LOGGER.info("=" * 63)
+    LOGGER.info("🎯 Python Pylenium Framework Starting")
+    LOGGER.info("=" * 63)
+    LOGGER.info(f"📅 Starting test session")
+    LOGGER.info(f"🌍 Environment: {os.getenv('ENV', 'qa')}")
+    LOGGER.info(f"💻 Browser: {os.getenv('BROWSER', 'chrome')}")
+    LOGGER.info(f"🎭 Headless: {os.getenv('HEADLESS', 'false')}")
+    LOGGER.info("=" * 63)
+    
+    # API-1: Create Pipeline Run
+    api_helper.before_all_tests()
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """
+    Called after test session finishes
+    API-4: Update Pipeline Run
+    """
+    LOGGER.info("\n" + "=" * 63)
+    LOGGER.info("🏁 Python Pylenium Tests Completed")
+    LOGGER.info("=" * 63)
+    
+    # API-4: Update Pipeline Run
+    api_helper.after_all_tests()
 
 
 # -------------------------------------------------------------------------
@@ -201,16 +237,45 @@ def axe(py) -> PyleniumAxe:
 
 
 # -------------------------------------------------------------------------
-# Custom screenshot on failure for ANY test (UI/API)
+# PYTEST HOOKS FOR API INTEGRATION
 # -------------------------------------------------------------------------
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item, call):
+    """
+    Capture test results and send to API
+    Also handles screenshots on failure
+    """
     outcome = yield
     rep = outcome.get_result()
-
-    if rep.when == "call" and rep.failed:
-        from utils.screenshot import save_screenshot_on_failure
-        save_screenshot_on_failure(item, rep)
-
+    
+    # Store report in item for later access
+    setattr(item, "report", rep)
+    
+    # API-3: Create Test Case (after test execution)
+    if rep.when == "call":
+        test_name = item.name
+        duration = rep.duration
+        
+        if rep.passed:
+            status = "passed"
+            error_message = None
+        elif rep.failed:
+            status = "failed"
+            error_message = str(rep.longrepr) if rep.longrepr else "Test failed"
+        elif rep.skipped:
+            status = "skipped"
+            error_message = str(rep.longrepr) if rep.longrepr else "Test skipped"
+        else:
+            status = "unknown"
+            error_message = None
+        
+        # Send to API
+        api_helper.after_each_test(test_name, status, duration, error_message)
+        
+        # Screenshot on failure
+        if rep.failed:
+            from utils.screenshot import save_screenshot_on_failure
+            save_screenshot_on_failure(item, rep)
+    
     return rep
