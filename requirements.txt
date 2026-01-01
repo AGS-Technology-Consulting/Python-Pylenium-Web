@@ -4,3 +4,4 @@ pytest-xdist>=3.0.0
 requests>=2.28.0
 pydantic>=1.10.7
 allure-pytest
+faker>=18.0.0
